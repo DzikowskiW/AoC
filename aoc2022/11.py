@@ -1,7 +1,10 @@
 import re 
 import math
 
+
 class Monkey:
+    maxVal = 1
+
     def __init__(self, input) -> None:
         self.id = int(re.search(r"Monkey (\d+):", input[0])[1])
         self.testDiv = int(re.search(r".+ (\d+)", input[3])[1])
@@ -10,21 +13,20 @@ class Monkey:
         self.falseId = int(re.search(r".+ (\d+)", input[5])[1])
         self.items = [int(item) for item in re.search(r"Starting items: (.+)", input[1])[1].split(', ')]
         self.inspects = 0
-        print(' ID', self.id, self.testDiv, self.operation, self.trueId, self.falseId, self.items)
 
     def __repr__(self) -> str:
         return "{" +'ID '+str(self.id)+', items: '+ ", ".join([str(i) for i in self.items])+" }"
 
     def worryLevel(self, old):
-        return eval(self.operation)
+        return eval(self.operation) % Monkey.maxVal
     
-    def throwItems(self, monkeys):
+    def throwItems(self, monkeys, divideByThree):
         items = self.items
         self.items = []
         for item in items:
             self.inspects +=1
-            worryLevel = math.floor(self.worryLevel(item) / 3)
-            print(item, worryLevel, worryLevel % self.testDiv)
+            worryLevel = self.worryLevel(item) 
+            if divideByThree: worryLevel = worryLevel // 3
             if worryLevel % self.testDiv == 0:
                 monkeys[self.trueId].items.append(worryLevel)
             else:
@@ -46,23 +48,26 @@ def parse(input):
             m.append(l)
     if len(m) > 0:
         parseMonkey(monkeys, m)
+    for m in monkeys: 
+        Monkey.maxVal *= m.testDiv
     return monkeys
 
-def loop(monkeys):
-    for round in range(0,20):
+def loop(monkeys, rounds, divideByThree):
+    for round in range(0,rounds):
         for m in monkeys:
-            print('\nMONKE', m.id)
-            m.throwItems(monkeys)
-        print('\nRound',round+1,": ")
-        print(monkeys)
-            
+            m.throwItems(monkeys, divideByThree)      
 
 with open("11.txt") as f:
     input = [x.strip() for x in f]
     monkeys = parse(input)
-    loop(monkeys)
+    
+    # Part 1
+    #loop(monkeys, 20, True)
+    
+    # Part 2
+    loop(monkeys, 10000, False)
 
     inspects= [m.inspects for m in monkeys]
     inspects.sort(reverse=True)
-    print('Part 1:', inspects[0]*inspects[1])
+    print('Result:', inspects[0]*inspects[1])
 
