@@ -1,13 +1,12 @@
 import numpy as np
 
 
-def bfs(input, sx, sy, end):
+def bfs(input, sx, sy, end = 'E'):
     x = sx
     y = sy
     smallest = -1
     visited = np.zeros_like(input, dtype=int)
     xlen, ylen = input.shape
-    print(xlen, ylen)
     next = [[sx,sy, 0, None]]
     while len(next) > 0:
         x,y, d, lastc = next.pop(0)
@@ -23,28 +22,42 @@ def bfs(input, sx, sy, end):
             continue
         visited[x][y] = d+1
         if input[x][y] == end:
-            print(visited)
-            return x, y, d
+            return d
         next.append([x-1, y, d+1, c])
         next.append([x+1, y, d+1, c])
         next.append([x, y-1, d+1, c])
         next.append([x, y+1, d+1, c])
     
-    print(visited)
     return 0
 
 
 def calc(input):
     #find start
     sx, sy = [n[0] for n in np.where(input == 'S')]
-    print(sx, sy)
-    
+
     #bfs
     return bfs(input, sx, sy, 'E')
+
+def calcPart2(input):
+    sx, sy = [n[0] for n in np.where(input == 'S')]
+    input[sx,sy] = 'a'
+    
+    res = []
+    xlen, ylen = input.shape
+    for xx in range(0,xlen):
+        for yy in range(0, ylen):
+            if (input[xx, yy] == 'a'):
+                path = bfs(input, xx, yy, 'E')
+                if (path > 0):
+                    res.append(path)
+        
+    #bfs
+    return min(res)
 
 
 with open("aoc2022/12.txt") as f:
     input = np.array([[*c] for c in [x.strip() for x in f]])
 
     print('part 1', calc(input))
+    print('part 2', calcPart2(input))
 
