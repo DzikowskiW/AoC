@@ -1,4 +1,5 @@
 from functools import cmp_to_key
+import json
 
 def compare(l, r):
     if isinstance(l, int) and isinstance(r, int):
@@ -41,7 +42,7 @@ def part1(input):
             assert(len(vals) == 2)
             vals = []
         else:
-            vals.append(eval(i))
+            vals.append(json.loads(i))
     if compare(*vals) == -1:
         rightOrders += n+1
         
