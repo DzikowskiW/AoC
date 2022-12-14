@@ -1,18 +1,18 @@
 import numpy as np
 
-SANDSTART_CHAR = '+'
+SANDSTART_CHAR = '➕'
 LIMIT_CHAR = '🪨'
-EMPTY_CHAR = '.'
-LINE_CHAR = '#'
-SAND_CHAR = 'O'
+EMPTY_CHAR = '⚫'
+LINE_CHAR = '🟤'
+SAND_CHAR = '🟡'
 
-def prepareCave(lines, minX, maxX, maxY):
+def plotCave(lines, minX, maxX, maxY):
     caveWidth = maxX - minX + 1
     cave = np.full((caveWidth, maxY+1),EMPTY_CHAR, dtype=str)
     for l in lines:
-        f = l.pop(0)
-        while len(l) > 0:
-            t = l.pop(0)
+        f = l[0]
+        for i in range(1,len(l)):
+            t = l[i]
             minXX = min(t[0], f[0]) - minX
             maxXX = max(t[0], f[0]) - minX
             minYY = min(t[1], f[1])
@@ -29,52 +29,61 @@ def prepareCave(lines, minX, maxX, maxY):
     return cave
 
 def printCave(cave):
-    print(np.transpose(cave))
+    c = np.transpose(cave)
+    for l in c:
+        print(''.join(l))
     
-def makeSand(cave):
+def dripSand(cave):
     sandY = 1
     sandX = np.where(cave == SANDSTART_CHAR)[0][0]
     sands = 0
+    
     while addSand(cave, sandX, sandY):
         sands += 1
-        print(sands)
-        if (sands == 843):
-            printCave(cave)
-    #printCave(cave)
-    print(sands)
+
+    print('Units of sand', sands)
 
 def addSand(cave, sandX, sandY):
     x = sandX
     y = sandY
+    if (cave[sandX, sandY] != SANDSTART_CHAR):
+        return False
+    
     while (True):
-        print(x,y)
         if (cave[x, y+1] == EMPTY_CHAR):
+            # go down
             y += 1
         elif (cave[x, y+1] == LIMIT_CHAR):
+            #bottomless pit
             return False
-        elif cave[x,y+1] in [LINE_CHAR, SAND_CHAR]:
-            if cave[x-1,y+1] == EMPTY_CHAR:
+        else:
+            # go down left
+            if cave[x-1, y+1] == EMPTY_CHAR:
                 y += 1
                 x -= 1
                 continue
+            
+            #go down right
             if cave[x+1,y+1] == EMPTY_CHAR:
                 x += 1
                 y += 1
                 continue
+            
+            #bottomless pit 
             if cave[x+1,y+1] == LIMIT_CHAR or cave[x-1,y+1] == LIMIT_CHAR:
                 return False
-            break
-        else: 
-            assert(False)
             
-    if cave[x][y] == EMPTY_CHAR:
+            #no way yo go, stay at x,y
+            break
+            
+    if cave[x][y] in [EMPTY_CHAR, SANDSTART_CHAR]:
         cave[x][y] = SAND_CHAR
         return True
     else:
-        return False
+        assert(False)
         
 
-with open("aoc2022/14.txt") as f:
+with open("aoc2022/14a.txt") as f:
     input = [x.strip() for x in f]
     lines = []
     minX = 1000
@@ -90,8 +99,15 @@ with open("aoc2022/14.txt") as f:
             if p[1] > maxY: maxY = p[1]
         lines.append(l)
         
-    cave = prepareCave(lines, minX, maxX, maxY)
-    #printCave(cave)
-    makeSand(cave)
-        
+    print('PART 1')
+    cave = plotCave(lines, minX, maxX, maxY)
+    dripSand(cave)
+    printCave(cave)
+    
+    cave = plotCave(lines, 0, maxX+1000, maxY+1)
+    cave[:,cave.shape[1]-1] = LINE_CHAR
+    print('PART 2')
+    dripSand(cave)
+    # printCave(cavePart2)
+
         
