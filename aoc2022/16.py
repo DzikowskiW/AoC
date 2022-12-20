@@ -1,6 +1,8 @@
 import re
 import copy
 
+class Cache:
+    dijsktraCache = {}
 class Valve: 
     maxMax = 0
 
@@ -14,6 +16,8 @@ class Valve:
         return '{' +  r + ')}'
 
 def dijsktra(valves, start):
+    if start in Cache.dijsktraCache:
+        return Cache.dijsktraCache[start]
     visited = set()
     distances = {}
     distances[start] = 0
@@ -28,6 +32,7 @@ def dijsktra(valves, start):
                 distances[tid] = distances[vid] + 1
             if tid not in visited:
                 queue.append(tid)
+    Cache.dijsktraCache[start] = distances
     return distances
                 
 def bestPath(valves, start, timeLeft, toOpen):
@@ -35,8 +40,9 @@ def bestPath(valves, start, timeLeft, toOpen):
 
     maxPaths = []
     for vid in paths:
+        if vid not in toOpen:
+            continue
         openTime = timeLeft - paths[vid]
-        # print(vid, openTime, openTime * valves[vid].flow, valves[maxPath])
         if openTime > 0 and openTime * valves[vid].flow > 0 and vid in toOpen:
             maxPaths.append([vid, paths[vid]])
     return maxPaths
@@ -73,7 +79,7 @@ def search(valves, vid, time, toOpen):
         print(Valve.maxMax)
     return maxFlow
 
-with open("16.txt") as f:
+with open("16a.txt") as f:
     maxMax = 0
     lines = [x.strip() for x in f]
     valves = {}
