@@ -48,6 +48,38 @@ def bestPath(valves, start, timeLeft, toOpen):
     return maxPaths
 
 
+def minuteSearch(valves, vid, vwait, time, flow, toOpen):
+    if time == 0:
+        return 0
+    
+    if len(toOpen) == 0:
+        return time * flow
+        
+    # traverse
+    if vwait > 0:
+        return flow + minuteSearch(valves, vid, vwait - 1, time - 1, flow, toOpen)
+
+    # open
+    if vid in toOpen and vwait == 0:
+        toOpen.remove(vid)
+        return flow + minuteSearch(valves, vid, 0, time - 1, flow + valves[vid].flow, toOpen)
+    
+    #find nextPath
+    maxFlow = 0
+    paths = bestPath(valves, vid, time+2, toOpen)
+    for p in paths:
+        toOpen1 = copy.deepcopy(toOpen)
+        nvid = p[0]
+        nwait = p[1]
+        n = minuteSearch(valves, nvid, nwait, time, flow, toOpen1)
+        if n > maxFlow: 
+            maxFlow = n
+
+    return maxFlow
+    
+        
+    
+
 def search(valves, vid, time, toOpen):
     if time <= 0  or len(toOpen) == 0:
         return 0
@@ -74,12 +106,12 @@ def search(valves, vid, time, toOpen):
             maxFlow = n
 
     maxFlow = curFlow + maxFlow
-    if (maxFlow > Valve.maxMax):
-        Valve.maxMax = maxFlow
-        print(Valve.maxMax)
+    # if (maxFlow > Valve.maxMax):
+    #     Valve.maxMax = maxFlow
+    #     print(Valve.maxMax)
     return maxFlow
 
-with open("16a.txt") as f:
+with open("aoc2022/16a.txt") as f:
     maxMax = 0
     lines = [x.strip() for x in f]
     valves = {}
@@ -90,7 +122,8 @@ with open("16a.txt") as f:
         if (valves[v].flow > 0):
             importantV.append(v)
     
-    print('Part 1', search(valves, 'AA', 30, importantV))
+    #print('Part 1', search(valves, 'AA', 30, importantV))
+    print('Part 1 minutte', minuteSearch(valves, 'AA', 0, 30, 0, importantV))
     
     
     
