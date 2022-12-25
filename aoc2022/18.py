@@ -20,8 +20,9 @@ def placeCubes(cubes):
                 walls += 1
     return walls
 
-def reachableCubes(cubes):
-    MINV = 0
+
+def floodCubes(cubes):
+    MINV = -1
     MAXV = 22
     
     cubesSet = set(cubes)
@@ -30,13 +31,15 @@ def reachableCubes(cubes):
     queue = [(0,0,0)]
     while (len(queue) > 0):
         c = queue.pop(0)
+        if c in visited:
+            continue
+        visited.add(c)
         for m in ADJACENT_VOXELS:
             adjacent = (c[0]+m[0], c[1]+m[1], c[2]+m[2])
             if adjacent in cubesSet:
-                walls += 1
+                walls += 1     
             elif adjacent not in visited and False not in [bool(MINV <= val <= MAXV) for val in adjacent]:
                 #inbouds
-                visited.add(adjacent)
                 queue.append(adjacent)
     return walls  
 
@@ -48,11 +51,11 @@ with open("aoc2022/18.txt") as f:
         x, y, z = [int(i) for i in line.split(',')]
         cubes.append((x,y,z))
         
-    # print('part1')
-    # print(placeCubes(cubes))
+    print('part1')
+    print(placeCubes(cubes))
     
     print('part2')
-    print(reachableCubes(cubes))
+    print(floodCubes(cubes))
 
     
     
