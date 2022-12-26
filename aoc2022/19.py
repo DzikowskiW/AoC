@@ -1,103 +1,71 @@
 import re
 import copy
-import numpy
-
-BP_ORE = 0
-BP_CLAY_ORE = 1
-BP_OBS_ORE = 2
-BP_OBS_CLAY = 3
-BP_GEO_ORE = 4
-BP_GEO_OBS = 5
+import numpy as np
 
 ORE = 0
 CLAY = 1
 OBS = 2
 GEO = 3
+MAX_POSSIBILITIES = 2000
 
-# ore, clay, obsidian, geode
-resources = [0,0,0,0]
-robots = [1,0,0,0]
-class Cache:
-    minGeode = 0
-    maxGeode = 0
-    c = {}
-def doFactorio(blueprint, time, resources, robots, robotsTodo=-1):
-    if time <= 0:
-        return resources[GEO]
-    cacheHash = (time,tuple(resources),tuple(robots),tuple(robotsTodo))
-    if cacheHash in Cache.c:
-        return Cache.c[cacheHash]
-    if time < Cache.minGeode and robots[GEO] == 0:
-        return 0
-    possibilities = []
-    #work
-    time = time - 1
-    for i in range(0,4):
-        resources[i] += robots[i]
+key = lambda a: tuple(a[0]+a[1]) + tuple(a[1])
+prune = lambda x: sorted({key(x):x for x in x}.values(), key=key)[-1000:]
     
-    #make robots
-    if robotsTodo >=0:
-        robots[robotsTodo] += 1
-
-    #decide what next
-    #buy machines
-    #geode
-    if blueprint[BP_GEO_ORE] <= resources[ORE] and blueprint[BP_GEO_OBS] <= resources[OBS]:
-        if time > Cache.minGeode:
-            Cache.minGeode = time
-            print('t', time)
-        resourcesCopy = copy.deepcopy(resources)
-        robotsCopy = copy.deepcopy(robots)
-        resourcesCopy[ORE] -= blueprint[BP_GEO_ORE]
-        resourcesCopy[OBS] -= blueprint[BP_GEO_OBS]
-        possibilities.append(doFactorio(blueprint, time, resourcesCopy, robotsCopy, GEO))
-    #obsidian
-    if blueprint[BP_OBS_ORE] <= resources[ORE] and blueprint[BP_OBS_CLAY] <= resources[CLAY]:
-        resourcesCopy = copy.deepcopy(resources)
-        robotsCopy = copy.deepcopy(robots)
-        resourcesCopy[ORE] -= blueprint[BP_OBS_ORE]
-        resourcesCopy[CLAY] -= blueprint[BP_OBS_CLAY]
-        robotsCopy[OBS] += 1
-        possibilities.append(doFactorio(blueprint, time, resourcesCopy, robotsCopy, OBS))
-    #clay
-    if (blueprint[BP_CLAY_ORE] <= resources[ORE]):
-        resourcesCopy = copy.deepcopy(resources)
-        robotsCopy = copy.deepcopy(robots)
-        resourcesCopy[ORE] -= blueprint[BP_CLAY_ORE]
-        robotsCopy[CLAY] += 1
-        possibilities.append(doFactorio(blueprint, time, resourcesCopy, robotsCopy, CLAY)) 
-    #ore
-    if (blueprint[BP_ORE] <= resources[ORE]):
-        resourcesCopy = copy.deepcopy(resources)
-        robotsCopy = copy.deepcopy(robots)
-        resourcesCopy[ORE] -= blueprint[BP_ORE]
-        robotsCopy[ORE] += 1
-        possibilities.append(doFactorio(blueprint, time, resourcesCopy, robotsCopy, ORE))
-    
-    #don't buy
-    resourcesCopy = copy.deepcopy(resources)
-    robotsCopy = copy.deepcopy(robots)
-    possibilities.append(doFactorio(blueprint, time, resourcesCopy, robotsCopy))
-    
-    maxx = max(possibilities)
-    if maxx > Cache.maxGeode:
-        Cache.maxGeode = maxx
-    Cache.c[cacheHash] = maxx
-    return maxx
-    
+def nparr(*a):
+     return np.array(a, dtype=int)
  
+def deduplicatePossibilities(possibilities):
+    posSet = set()
+    dedup = []
+    for resources, robots in possibilities:
+        key = (tuple(resources), tuple(robots))
+        if key not in posSet:
+            dedup.append((resources, robots))
+            posSet.add(key)
 
-with open("aoc2022/19a.txt") as f:
+    #minimize number of possibilities
+    dedup = sorted(dedup, key=lambda t: tuple(t[0] + t[1]))
+    return dedup[-MAX_POSSIBILITIES:]
+    
+def doFactorio(blueprint, time):
+    possibilities = [(nparr(0,0,0,0), nparr(0,0,0,1))]
+    for minute in range(time, 0, -1):
+        nextPossibilities = []
+        for resources, robots in possibilities:
+            #check if we can make robots
+            if all(blueprint[GEO] <= resources):
+                nextPossibilities.append([resources - blueprint[GEO] + robots, robots + nparr(1,0,0,0)])
+            if all(blueprint[OBS] <= resources):
+                nextPossibilities.append([resources - blueprint[OBS] + robots, robots + nparr(0,1,0,0)])
+            if all(blueprint[CLAY] <= resources):
+                nextPossibilities.append([resources - blueprint[CLAY] + robots, robots + nparr(0,0,1,0)])
+            if all(blueprint[ORE] <= resources):
+                nextPossibilities.append([resources - blueprint[ORE] + robots, robots + nparr(0,0,0,1)])
+            #produce resources
+            nextPossibilities.append([resources + robots, robots])
+        possibilities = deduplicatePossibilities(nextPossibilities)
+        
+    return max(have[0] for have, _ in possibilities)
+
+with open("aoc2022/19.txt") as f:
     lines = [x.strip() for x in f]
     blueprints = []
+    res = []
+    sum = 0
     for line in lines:
-        ore, clayOre, obsidianOre, obsidianClay, geodeOre, geodeObsidian = re.search(r"Blueprint \d+:\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+", line).groups()
-        blueprint = [ore, clayOre, obsidianOre, obsidianClay, geodeOre, geodeObsidian]
-        blueprint = [int(n) for n in blueprint]
+        id, ore, clayOre, obsidianOre, obsidianClay, geodeOre, geodeObsidian = re.search(r"Blueprint (\d+):\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+", line).groups()
+        id = int(id)
+        blueprint = nparr(
+            nparr(0,0,0,ore),
+            nparr(0, 0, 0, clayOre),
+            nparr(0,0, obsidianClay, obsidianOre),
+            nparr(0, geodeObsidian, 0, geodeOre)
+        )
         blueprints.append(blueprint)
-    
-    print(doFactorio(blueprints[0], 24, resources, robots))
-    print(blueprints[0])
+        maxGeodes = doFactorio(blueprint, 24)
+        print(id, maxGeodes)
+        sum += id * maxGeodes
+    print('Part 1:', sum)
     
     
     
