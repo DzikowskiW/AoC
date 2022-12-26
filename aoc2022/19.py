@@ -2,10 +2,10 @@ import re
 import copy
 import numpy as np
 
-ORE = 0
-CLAY = 1
-OBS = 2
-GEO = 3
+ORE = 3
+CLAY = 2
+OBS = 1
+GEO = 0
 MAX_POSSIBILITIES = 2000
 
 key = lambda a: tuple(a[0]+a[1]) + tuple(a[1])
@@ -45,7 +45,7 @@ def doFactorio(blueprint, time):
             nextPossibilities.append([resources + robots, robots])
         possibilities = deduplicatePossibilities(nextPossibilities)
         
-    return max(have[0] for have, _ in possibilities)
+    return max(resources[GEO] for resources, _ in possibilities)
 
 with open("aoc2022/19.txt") as f:
     lines = [x.strip() for x in f]
@@ -56,10 +56,10 @@ with open("aoc2022/19.txt") as f:
         id, ore, clayOre, obsidianOre, obsidianClay, geodeOre, geodeObsidian = re.search(r"Blueprint (\d+):\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+", line).groups()
         id = int(id)
         blueprint = nparr(
-            nparr(0,0,0,ore),
-            nparr(0, 0, 0, clayOre),
+            nparr(0, geodeObsidian, 0, geodeOre),
             nparr(0,0, obsidianClay, obsidianOre),
-            nparr(0, geodeObsidian, 0, geodeOre)
+            nparr(0, 0, 0, clayOre),
+            nparr(0,0,0,ore),
         )
         blueprints.append(blueprint)
         maxGeodes = doFactorio(blueprint, 24)
