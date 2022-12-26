@@ -6,7 +6,7 @@ ORE = 3
 CLAY = 2
 OBS = 1
 GEO = 0
-MAX_POSSIBILITIES = 2000
+MAX_POSSIBILITIES = 100
 
 key = lambda a: tuple(a[0]+a[1]) + tuple(a[1])
 prune = lambda x: sorted({key(x):x for x in x}.values(), key=key)[-1000:]
@@ -23,7 +23,7 @@ def deduplicatePossibilities(possibilities):
             dedup.append((resources, robots))
             posSet.add(key)
 
-    #minimize number of possibilities
+    #assume that the best candidate is within MAX_POSSIBILITIES best
     dedup = sorted(dedup, key=lambda t: tuple(t[0] + t[1]))
     return dedup[-MAX_POSSIBILITIES:]
     
@@ -51,7 +51,8 @@ with open("aoc2022/19.txt") as f:
     lines = [x.strip() for x in f]
     blueprints = []
     res = []
-    sum = 0
+    part1 = 0
+    part2 = 1
     for line in lines:
         id, ore, clayOre, obsidianOre, obsidianClay, geodeOre, geodeObsidian = re.search(r"Blueprint (\d+):\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+", line).groups()
         id = int(id)
@@ -62,10 +63,11 @@ with open("aoc2022/19.txt") as f:
             nparr(0,0,0,ore),
         )
         blueprints.append(blueprint)
-        maxGeodes = doFactorio(blueprint, 24)
-        print(id, maxGeodes)
-        sum += id * maxGeodes
-    print('Part 1:', sum)
+        part1 += id * doFactorio(blueprint, 24)
+        if id < 4:
+            part2 *= doFactorio(blueprint, 32)
+    print('Part 1:', part1)
+    print('Part 2:', part2)
     
     
     
