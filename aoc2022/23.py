@@ -109,5 +109,5 @@ with open("aoc2022/23.txt") as f:
             if c == '#':
                 elves[(y, x)] = '#'
     
-    moveTimes(10, elves)
+    printElves(moveTimes(10, elves))
        
