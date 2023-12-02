@@ -52,6 +52,6 @@ def loop2(lines):
             
     print('part 2:', summ)
     
-lines = aoc.input_as_lines("02.txt")
+lines = aoc.input_as_lines("input/02.txt")
 loop1(lines)
 loop2(lines)

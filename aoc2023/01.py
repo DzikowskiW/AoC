@@ -39,6 +39,6 @@ def loop2(lines):
         summ += digits1
     print(summ)
     
-lines = aoc.input_as_lines("01.txt")
+lines = aoc.input_as_lines("input/01.txt")
 loop(lines)
 loop2(lines)
