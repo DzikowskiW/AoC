@@ -30,14 +30,14 @@ def loop(lines):
     engine = np.pad(lines,1, constant_values='.')
     part1 = 0
     part2 = 0
-    for x in range(engine.shape[0]):
-        for y in range(engine.shape[1]):
+    for row in range(engine.shape[0]):
+        for col in range(engine.shape[1]):
             #part 1
-            if engine[x][y] != '.' and not engine[x][y].isdigit():
-                part1 += sum(find_part_numbers(engine, x, y))
+            if engine[row][col] != '.' and not engine[row][col].isdigit():
+                part1 += sum(find_part_numbers(engine, row, col))
             #part 2
-            if engine[x][y] == '*':
-                nums = find_part_numbers(engine, x, y)
+            if engine[row][col] == '*':
+                nums = find_part_numbers(engine, row, col)
                 if len(nums) == 2:
                     part2 += math.prod(nums)
     print('part 1:', part1)
