@@ -1,5 +1,5 @@
 import aoc
-import re
+import math
 import numpy as np
 
 #return full number with its start coords 
@@ -39,7 +39,7 @@ def loop(lines):
             if engine[x][y] == '*':
                 nums = find_part_numbers(engine, x, y)
                 if len(nums) == 2:
-                    part2 += nums[0] * nums[1]
+                    part2 += math.prod(nums)
     print('part 1:', part1)
     print('part 2:', part2)
 
