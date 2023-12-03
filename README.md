@@ -36,7 +36,7 @@ for match in matches:
     print(match)
 ```
 
-enumerate() - adds index to for loop, use `start` flag to start from other value than 0
+`enumerate()` - adds index to for loop, use `start` flag to start from other value than 0
 ```
 for count, value in enumerate(values):
     ...
