@@ -6,20 +6,13 @@ def getNumber(engine, x,y, stopy=-1):
     numm = str(engine[x][y])
     yl = y-1
     while engine[x][yl].isdigit():
-        if yl < 0: 
-            break
         numm = str(engine[x][yl]) + numm
         yl -= 1
-
     yr = y+1
-    if yr < engine.shape[0]:
-        while engine[x][yr].isdigit():
-            if yr >= engine.shape[0]:
-                break
-            numm += engine[x][yr]
-            yr += 1
-    # print((numm, yl+1,yr-1))
-    return (int(numm), yl+1,yr-1)
+    while engine[x][yr].isdigit():
+        numm += engine[x][yr]
+        yr += 1
+    return (int(numm), yl,yr)
 
 def findPartNumbers(engine, x, y):
     nums = set()
@@ -30,24 +23,25 @@ def findPartNumbers(engine, x, y):
             if (engine[xx][yy].isdigit()):
                 numm = getNumber(engine, xx, yy)
                 nums.add(numm)
-    return nums      
+    sum = 0
+    for n in nums:
+        sum+=n[0]
+    return sum      
 
 #first part
 def loop1(lines):
     print('part 1')
-    lines1 = list(map(lambda l: ['.', *l, '.'], lines))
+    lines1 = list(map(lambda l: [ *l], lines))
     
-    engine = np.array(lines1)
-    print(engine.shape)
-    print(engine)
+    engine = np.pad(np.array(lines1),1, constant_values='.')
     summ = 0
     nums = set()
     for x in range(engine.shape[0]):
         for y in range(engine.shape[1]):
             if engine[x][y] != '.' and not engine[x][y].isdigit():
-                numm = findPartNumbers(engine, x, y)
-                print('num', engine[x][y], x, y, numm)
-                nums = nums.union(numm)
+                summ += findPartNumbers(engine, x, y)
+                # print('num', engine[x][y], x, y, numm)
+                # nums = nums.union(numm)
     print(nums)
     for nn in nums:
         summ += nn[0]
@@ -64,4 +58,4 @@ def loop2(lines):
     
 lines = aoc.input_as_lines("input/03.txt")
 loop1(lines)
-#loop2(lines)
+
