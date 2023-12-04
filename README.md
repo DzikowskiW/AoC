@@ -21,7 +21,7 @@ Lately I find Python to be the best language to efficiently do the job. Besides 
 ## Python tips & tricks
 
 [defaultdic](https://docs.python.org/3/library/collections.html#collections.defaultdict) - Dictionary with default value
-```
+```python
 parts = defaultdict(list)
 parts['foo'].append('bar)
 
@@ -29,27 +29,20 @@ a = defaultdict(int)
 d = defaultdict(set)
 ```
 
-`re.finditer()` - creates iterable list of matches
-```
-matches = re.finditer(pattern, s)
-for match in matches:
-    print(match)
-```
-
 `enumerate()` - adds index to for loop, use `start` flag to start from other value than 0
-```
+```python
 for count, value in enumerate(values):
     ...
 ```
 
 `math.prod` - multiplies array values
-```
+```python
 a = [1, 2, 3, 4]
 print(mathprod(a)) # 24
 ```
 
 `@functools.cache` - memoization of function results, [documetation link](https://docs.python.org/3/library/functools.html)
-```
+```python
 import functools
 
 @functools.cache
@@ -58,3 +51,19 @@ def factorial(n):
 ```
 
 intertools - useful library for efficient looping [documentation link](https://docs.python.org/3/library/itertools.html)
+
+### Parsing input
+
+```python
+  for i, line in enumerate(lines, start=1):
+      (p1, p2) = line.split('|')
+      i, *winning = list(map(int,re.findall(r'(\d+)', p1)))
+      mine = list(map(int,re.findall(r'\d+', p2)))
+```
+
+`re.finditer()` - creates iterable list of matches
+```python
+matches = re.finditer(pattern, s)
+for match in matches:
+    print(match)
+```
