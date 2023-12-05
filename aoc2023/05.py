@@ -73,7 +73,7 @@ def loop2(seeds, lines):
                 break;
             t = prevSteps[t]
         if in_seed_range(res, seed_ranges): 
-            print('part2', ii, res)
+            print('part2', ii)
             return
         ii += 1
 
