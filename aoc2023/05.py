@@ -39,6 +39,7 @@ def in_seed_range(n, range):
             return True    
     return False
 
+#part2 69323688 3281178213
 def loop2(seeds, lines):
     # seed ranges
     seed_ranges = []
@@ -77,9 +78,41 @@ def loop2(seeds, lines):
             return
         ii += 1
 
+def find_sus_points(l, r, step, nextSteps, types):
+    if step not in nextSteps:
+        return min 
+
+    points = [l, r]
+    
+    for src, dest, length in types[step]:
+        if 
         
-lines = aoc.input_as_lines("input/05.txt")
+    
+def loop3(seeds, lines):
+    # seed ranges
+    seed_ranges = sorted([(seeds[i], seeds[i]+seeds[i+1]) for i in range(0, len(seeds) - 1, 2)])
+    
+    nextSteps = {}
+    curStep = ''
+    nextStep = ''
+    types = defaultdict(list)
+    for i, line in enumerate(lines):
+        if len(line) == 0:
+            curStep = ''
+        elif curStep == '':
+            curStep, nextStep = line.split(' ')[0].split('-to-')
+            nextSteps[curStep] = nextStep
+        else:
+            dest, src, l = list(map(int, line.split(' ')))
+            types[curStep].append((src,dest,l))
+    points = []
+    for l,r in seed_ranges:
+        points.extend(find_sus_points(seed_ranges, l, r, 'seed', types))
+    print(points);
+    
+lines = aoc.input_as_lines("input/05a.txt")
 seeds = list(map(int,re.findall(r'\d+', lines[0])))
 lines = lines[2:]
-loop1(seeds, lines)
-loop2(seeds, lines)
+# loop1(seeds, lines)
+# loop2(seeds, lines)
+loop3(seeds, lines)
