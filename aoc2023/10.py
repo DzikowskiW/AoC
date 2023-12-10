@@ -1,6 +1,7 @@
 import aoc
 import numpy as np
 
+FLOOD_VAL = 2
 SYMBOL_TO_XY_MAP = {
     '|': [(-1,0), (1,0)],
     '-': [(0,-1), (0,1)],
@@ -66,7 +67,7 @@ def loop(lines):
         dist +=1
         for p in path: 
             path_points.add(p)
-    print('part1', dist)
+    print('part 1', dist)
     
     # PART 2
     # One char from lines = 3x3 matrix to include spaces between pipes
@@ -84,26 +85,23 @@ def loop(lines):
             arr[y+dy][x+dx] = 1
 
     # flood
-    insidePoints = set()
-    seed = (start[0]*3, start[1]*3) # any corner will do fine
-    insidePoints.add(seed)
-    while (len(insidePoints) > 0):
-        p = insidePoints.pop()
-        arr[p] = 2
+    pointsToFlood = set([(0,0)])
+    while (len(pointsToFlood) > 0):
+        p = pointsToFlood.pop()
+        arr[p] = FLOOD_VAL
         for i in range(p[0]-1, min(p[0]+2, len(arr))):
             for j in range(p[1]-1, min(p[1]+2, len(arr[0]))):
                 if arr[i,j] == 0:
-                    insidePoints.add((i,j))
+                    pointsToFlood.add((i,j))
     
     # debug
     # np.savetxt('tmp.txt', arr, fmt='%d')
     
     #find tiles (3x3 of inside value)
     tiles_count = 0
-    inside_val = 2 - arr[0,0] # 2 or 0 
     for i in range(0,len(arr),3):
         for j in range(0, len(arr[0]),3):
-            if np.all(arr[i:i+3, j:j+3] == inside_val):
+            if np.all(arr[i:i+3, j:j+3] == 0):
                 tiles_count +=1
     print('part 2:', tiles_count)
     
