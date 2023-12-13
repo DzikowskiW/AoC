@@ -10,6 +10,10 @@ def input_as_lines(filename:str) -> List[str]:
     """Return a list where each line in the input file is an element of the list"""
     return input_as_string(filename).split("\n")
 
+def input_as_char_clusters(filename:str) -> List[str]:
+    """Return a list where each line in the input file is an element of the list"""
+    return [[[*l] for l in ll.split("\n")] for ll in input_as_string(filename).split("\n\n")]
+
 def input_as_ints(filename:str) -> List[int]:
     """Return a list where each line in the input file is an element of the list, converted into an integer"""
     lines = input_as_lines(filename)

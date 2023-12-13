@@ -1,43 +1,26 @@
-import aoc
-import re
-import math
-from collections import defaultdict
 import numpy as np
-from itertools import combinations
 
-def findAxis(shape):
+def findAxis(shape, smudges = 0):
     for i in range(1, len(shape)):
-        mirr = True
         size = min(i, len(shape)-i)
-        if size == 0:
-            continue
-        for j in range(size):
-            if not np.all(shape[i-j-1] == shape[i+j]):
-                mirr = False
-                break
-        if mirr:
+        if size > 0:
+            arr1 = shape[i-size:i]
+            arr2 = shape[i:i+size]
+            arr_diff_count = np.count_nonzero(np.logical_not(arr1 == np.flipud(arr2)).astype(int))
+        if arr_diff_count == smudges:
             return i
-            # print(i)
-            # print(list(range(size)))
-            # print(shape[i])
     return 0
         
-
-def loop(shapes):
+def summarize(shapes, smudges):
     summ = 0
     for s in shapes:
-        summ += findAxis(s)*100
-        summ += findAxis(s.T)
-    print(summ)
+        summ += findAxis(s, smudges)*100
+        summ += findAxis(s.T, smudges)
+    return summ
     
-
-lines = aoc.input_as_lines("input/13.txt")
-shapes = [[]]
-for l in lines:
-    if l == '':
-        shapes.append([])
-    else:
-        shapes[-1].append([*l])
-
-shapes = [np.array(s) for s in shapes]
-loop(shapes)
+with open("input/13a.txt") as f:
+    input = f.read().rstrip("\n").split("\n\n")
+    input = [[[*l] for l in ll.split("\n")] for ll in input]
+    shapes = [np.array(s) for s in input]
+    print('part 1:', summarize(shapes, 0))
+    print('part 2:', summarize(shapes, 1))
