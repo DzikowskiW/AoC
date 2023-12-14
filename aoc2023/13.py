@@ -18,7 +18,7 @@ def summarize(shapes, smudges):
         summ += findAxis(s.T, smudges)
     return summ
     
-with open("input/13a.txt") as f:
+with open("input/13.txt") as f:
     input = f.read().rstrip("\n").split("\n\n")
     input = [[[*l] for l in ll.split("\n")] for ll in input]
     shapes = [np.array(s) for s in input]
