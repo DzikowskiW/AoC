@@ -1,42 +1,43 @@
 import aoc
-import re
-import math
-from collections import defaultdict
-import numpy as np
-from itertools import combinations
+import functools
 
-PART1_MUL = 2
-PART2_MUL = 1000000
-
-def analise(springs, conditions):
+@functools.cache
+def calc(springs, clusters):
+    if not clusters:
+        if '#' not in springs:
+            return 1
+        else:
+            return 0
+    if not springs:
+        return 0
+    if len(springs) < clusters[0]:
+        return 0
+    
+    nc = clusters[0]
     res = 0
-    if not '?' in springs:
-        # print(conditions, ''.join(springs))
-        return 1 if re.match(conditions,''.join(springs)) else 0
-    unknown_pos = springs.index('?')
-    springs[unknown_pos] = '#'
-    res += analise(springs, conditions)
-    springs[unknown_pos] = '.'
-    res += analise(springs, conditions)
-    springs[unknown_pos] = '?'
+    if springs[0] in ['.', '?']:
+        res += calc(springs[1:], clusters)
+    if springs[0] in ['#', '?']:
+        if '.' in springs[0:nc]:
+            pass
+        elif nc == len(springs):
+            if len(clusters) == 1:
+                res += 1
+        elif springs[nc] in ['?','.']:
+            res += calc('.'+springs[nc+1:], clusters[1:])
     return res
 
-
 def loop(lines):
-    summ = 0
+    part1 = 0
+    part2 = 0
     for l in lines:
         springs, conditions = l.split(' ')
-        reg = '^\.*'
-        for i,c in enumerate(conditions.split(',')):
-            if i > 0:
-                reg+= '\.+'
-            reg += '#{'+c+'}'
-        reg += '\.*$'
-        # print(l, reg)
-        res = analise([*springs], reg)
-        summ += res
-        # print(res)
-    print(summ) 
+        part1 += calc(springs, tuple(map(int,conditions.split(','))))
+        springs = ((springs + '?') * 5)[0:-1]
+        conditions = ((conditions + ',') * 5)[0:-1]
+        part2 += calc(springs, tuple(map(int,conditions.split(','))))
+    print('part1:', part1) 
+    print('part2:', part2) 
     
 
 lines = aoc.input_as_lines("input/12.txt")
