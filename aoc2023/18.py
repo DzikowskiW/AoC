@@ -23,6 +23,7 @@ def flood(canvas, y,x):
                 to_fill.add(next_val)
     return canvas
 
+#PART 1 - flood fill
 def loop(lines):
     #arbitrary params
     ylen = 300
@@ -40,9 +41,36 @@ def loop(lines):
             canvas[head] = FULL
     flood(canvas, head[0]+1, head[1]+1)
     np.savetxt("./output/tmp.txt", canvas, fmt='%s',delimiter='')
-    print('part 1:', (canvas == FULL).sum())        
+    print('part 1:', (canvas == FULL).sum())  
    
-with open("input/18.txt") as f:
+def dehex(h):
+    HEX_DIRS = ['R','D', 'L', 'U']
+    dir = HEX_DIRS[int(h[-1])]
+    n = int(h[1:-1], 16)
+    return dir, n
+    
+#PART 2 - shoelace algorithm (also can be applicable for part 1)  
+def shoelace(lines):
+    area = 0
+    head = (0,0)
+    for l in lines:
+        _, _, hex_data = l
+        dir, n = dehex(hex_data)
+        dy = DIRS[dir][0]*n
+        dx = DIRS[dir][1]*n
+        area += n
+        dx = 0 if dx == 0 else dx
+        dy = 0 if dy == 0 else dy
+        tail = (head[0] + dy, head[1] + dx) 
+        area += head[1] * tail[0] - head[0] * tail[1]
+        head = tail
+    tail = (0,0)
+    area += head[1] * tail[0] - head[0] * tail[1]
+    area  = int(area/2) + 1 # wut?
+    print('part 2:', area)
+
+with open("input/18a.txt") as f:
     lines = f.read().rstrip().split('\n')
     lines = [(ll[0], int(ll[1]), ll[2][1:-1]) for ll in (l.split(" ") for l in lines)]
     loop(lines)
+    shoelace(lines)
