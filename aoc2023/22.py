@@ -21,24 +21,25 @@ def check_level_down(world, voxels):
         res.add((y,x,z-1))
     return (True, res)
     
-def part1(input):
-    print(input)
-    
+def part1(input):    
     blocks = []
+    block_voxels = defaultdict(list)
     world = set()
     maxz = 1
     #set up world
-    for i in input:
-        maxz = max(maxz, i[0][2], i[1][2])
-        world.update(to_voxels(i))
-        blocks.append(i)
+    for i, inp in enumerate(input):
+        maxz = max(maxz, inp[0][2], inp[1][2])
+        block_voxels[i] = to_voxels(inp)
+        world.update(block_voxels[i])
+        blocks.append(inp)
+    
     #move blocks down
     for curz in range(1,maxz+1):
-        print(curz)
-        for b in blocks:
+        # print(curz)
+        for i, b in enumerate(blocks):
             if b[0][2] == curz or b[1][2] == curz:
                 #move down
-                voxels = to_voxels(b)
+                voxels = block_voxels[i]
                 world.difference_update(voxels)
                 while True:
                     success, voxels = check_level_down(world, voxels)
@@ -47,11 +48,12 @@ def part1(input):
                         b[1][2] -= 1
                     else:
                         world.update(voxels)
+                        block_voxels[i] = voxels
                         break
-    #check blocks
+    # PART 1
     res = []
-    for b in blocks:
-        voxels = to_voxels(b)
+    for i, b in enumerate(blocks):
+        voxels = block_voxels[i]
         world.difference_update(voxels)
         important = False
         for bb in blocks:
@@ -68,10 +70,37 @@ def part1(input):
             res.append(b)
         world.update(voxels)
                 
-    print('Part1', len(res))
+    print('Part 1', len(res))
     
-    
-    
+    # PART 2
+    res = []
+    tops = defaultdict(set)
+    bottoms = defaultdict(set)
+    for i in block_voxels:
+        if (min(blocks[i][0][2], blocks[i][1][2]) == 1):
+            continue
+        for vy, vx, vz in block_voxels[i]:
+            for j in range(len(block_voxels)):
+                if i != j:
+                    if (vy,vx,vz-1) in block_voxels[j]:
+                        tops[j].add(i)
+                        bottoms[i].add(j)
+                        continue
+
+    part2 = 0
+    for i in range(len(block_voxels)):
+        to_fall = set()
+        to_process = [i]
+        to_fall.add(i)
+        while to_process:
+            j = to_process.pop(0)
+            for jj in tops[j]:
+                if bottoms[jj] <= to_fall:
+                    to_fall.add(jj)
+                    to_process.append(jj)
+        if (len(to_fall)):
+            part2 += len(to_fall) - 1
+    print('Part 2', part2)
 
 with open("input/22.txt") as f:
     lines = f.read().rstrip().split('\n')
