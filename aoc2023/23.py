@@ -7,7 +7,7 @@ from copy import deepcopy
 START = (0,1)
 EDGES = [(-1, 0, '^'), (0,1,'>'), (1, 0, 'v'), (0, -1, '<')]
 
-def topo_sort(mapp, start = START):
+def topo_sort_part1(mapp, start = START):
     ylen = len(mapp)
     xlen = len(mapp[0])
     
@@ -37,7 +37,7 @@ def topo_sort(mapp, start = START):
             if 0 <= ny < ylen and 0 <= nx < xlen:     
                 if mapp[ny][nx] in ['.', '<','>','v', '^']:
                     edge_count += 1
-                if mapp[ny][nx] in ['.', slope]:
+                if mapp[ny][nx] in ['.', '<','>','v', '^']:
                     edges.append((ny,nx))
         if edge_count != 2:
             vertices.add((y,x))
@@ -82,6 +82,68 @@ def topo_sort(mapp, start = START):
     # print(topo)
     print('part1:', longest[(ylen - 1, xlen - 2)])
 
+def part2(mapp, start = START):
+    ylen = len(mapp)
+    xlen = len(mapp[0])
+    
+    #make tree
+    vertices = set()
+    #edge =  dist, (y,x)
+    edges_to = defaultdict(list)
+    edges_from = defaultdict(list)
+    edges_all = defaultdict(list)
+    perms = set()
+    temps = set()
+    topo = []
+    vertices.add(start)
+    
+    #map vertices (point, from_vertex, dist)
+    to_check = [(start[0], start[1], start[0], start[1], -1)]
+    while to_check:
+        y,x,fy,fx, dist = to_check.pop(0)
+        if (y,x,fy,fx) in temps:
+            continue
+        temps.add((y,x,fy,fx))
+        dist += 1
+        edges = []
+        edge_count = 0
+        for dy, dx, slope in EDGES:
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < ylen and 0 <= nx < xlen:     
+                if mapp[ny][nx] in ['.', '<','>','v', '^']:
+                    edge_count += 1
+                if mapp[ny][nx] in ['.', slope]:
+                    edges.append((ny,nx))
+        if edge_count != 2:
+            vertices.add((y,x))
+            if (y,x) != (fy,fx):
+                edges_from[(fy,fx)].append((dist,(y,x)))
+                edges_to[(y,x)].append((dist,(fy,fx)))
+                edges_all[(fy,fx)].append((dist,(y,x)))
+                edges_all[(y,x)].append((dist,(fy,fx)))
+                dist = 0
+                fy,fx = y,x
+        for e in edges:
+            to_check.append((e[0],e[1], fy,fx, dist))
+   
+    seen = set()
+    p2 = 0
+    def dfs1(y,x, d):
+        nonlocal p2
+        if (y,x) in seen:
+            return
+        if (y,x) == (ylen-1, xlen-2):
+            # if d > p2:
+            #     print(d)
+            p2 = max(p2, d)
+            return
+        seen.add((y,x))
+        for e in edges_all[(y,x)]:
+            dd, (ny, nx) = e
+            dfs1(ny, nx, dd + d)
+        seen.remove((y,x))
+    dfs1(*start, 0)
+    print('part2:', p2)
 
 
 def p(mapp, points = set(), symbol = 'O'):
@@ -98,4 +160,5 @@ def p(mapp, points = set(), symbol = 'O'):
 
 with open("input/23.txt") as f:
     lines = f.read().rstrip().split('\n')
-    topo_sort(lines)
+    topo_sort_part1(lines)
+    part2(lines)
