@@ -1,5 +1,6 @@
 from collections import defaultdict
 from copy import deepcopy
+import math
 
 UNKNOWN = 0
 SWITCH = 1
@@ -12,8 +13,9 @@ def process(inputs):
     modules = defaultdict(list)
     switches = defaultdict(bool)
     converters = {}
+    last_converter = None
     module_types = defaultdict(int)
-    
+    last_converter_high_count = defaultdict(int)
     #get converters
     for fr, _ in inputs:
         if fr[0] == '&':
@@ -36,18 +38,16 @@ def process(inputs):
         else:
             continue
         for m in to:
+            if m == 'rx':
+                last_converter = mname
             modules[mname].append(m)
             if m in converters:
                 converters[m][mname] = False
-
-    # print(modules)
-    # print('-'*80)
-    # print(converters)
     
     lows = 0
     highs = 0
     
-    def button_press():
+    def button_press(it):
         nonlocal highs, lows
         pulses = [('button', 'broadcaster', False)]
         count = 0
@@ -59,8 +59,15 @@ def process(inputs):
             else:
                 lows += 1
             nxt_t = t
-            if module_types[module] == CONVERTER:
+            if module_types[module] == CONVERTER:    
                 converters[module][from_module] = t
+                #checking part 2
+                if module == last_converter and t:
+                    if last_converter_high_count[from_module] == 0:
+                        last_converter_high_count[from_module] = it
+                        if len(last_converter_high_count) == len(converters[module]):
+                            return False
+                #end checking part 2
                 nxt_t = not all(converters[module].values())
                 for m in modules[module]:
                     pulses.append((module, m, nxt_t))
@@ -82,13 +89,11 @@ def process(inputs):
     i = 0
     while True:
         i+=1
-        if not button_press():
-            #brute force doesn't work in reasonable time
-            print('part 2', i)
+        if not button_press(i):
+            print('part 2', math.lcm(*last_converter_high_count.values()))
             return
         if (i == 1000):
             print('part 1', highs * lows)
-
 
 with open("input/20.txt") as f:
     lines = f.read().rstrip().split('\n')
